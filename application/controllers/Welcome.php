@@ -13,12 +13,12 @@ class Welcome extends CI_Controller
 		//$this->load->database();
 		
     }
-    public function paginacion(){
+    public function paginacion($base,$pagina,$varBusque){
 		//$this->load->model('Movie_model');		
 		$this->load->library('pagination');
-		$config['base_url'] = base_url().'Welcome/index/';
-		//Obtiene el total de registros a paginar 
-		$config['total_rows'] = $this->Movie_model->get_total_pelis();
+		
+		$config['base_url'] = base_url().base;
+		
 		//Obtiene el numero de registros a mostrar por pagina 
 	    $config['per_page'] = '16';	
 	    //Indica que segmento de la URL tiene la paginación, por default es 3
@@ -40,7 +40,16 @@ class Welcome extends CI_Controller
   		// Se obtienen los registros a mostrar
 	  	$desde = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;
 		// Se obtienen los registros a mostrar
-		$datos['pelis'] = $this->Movie_model->get_pelis($config['per_page'], $desde);  	    
+		if($pagina=="index"){
+			$datos['pelis'] = $this->Movie_model->get_pelis($config['per_page'], $desde);  
+		}elseif ($pagina=="top") {
+			$datos['pelis'] = $this->Movie_model->get_listar_top_pelis($config['per_page'], $desde);  
+		}elseif ($pagina=="genero") {
+			$datos['pelis'] = $this->Movie_model_genero->get_genero_pelis($varBusque,$config['per_page'], $desde);  
+		}elseif ($pagina=="listar") {
+			$datos['pelis'] = $this->Movie_model->get_listar_pelis($varBusque,$config['per_page'], $desde);  
+		}
+			    
 		// Retorna los datos con el total de datos paguinados
 		return $datos;
 	    //Se llama a la vista para mostrar la información
@@ -51,7 +60,7 @@ class Welcome extends CI_Controller
 		$ultimosArticulos['pelis'] = $this->Movie_model->get_listar_new_pelis();
 		$this->load->view('banner_bottom',$ultimosArticulos);
 	    //Se llama a la vista para mostrar la información y se adiciona la paguinacion
-	   	$this->load->view('cuerpo', $this->paginacion());	   
+	   	$this->load->view('cuerpo', $this->paginacion('Welcome/index/','index',null));	   
 	    // Se guarda el cache de la paguina
 	    //$this->output->cache(5);
 		$this->load->view('footer');	
@@ -127,9 +136,12 @@ class Welcome extends CI_Controller
 		$this->load->view('index');
 		$this->load->view('container');
 		$this->load->model('Movie_model');	
-        $ultimosArticulos['pelis'] = $this->Movie_model->get_genero_pelis($genero);
-        $this->load->view('genero', $ultimosArticulos);
-    	//$this->load->view('genero', $this->paginacion($pagina,$genero));    	
+		$ultimosArticulos['pelis'] = $this->Movie_model->get_listar_new_pelis();
+		$this->load->view('banner_bottom',$ultimosArticulos);
+	    //Se llama a la vista para mostrar la información y se adiciona la paguinacion
+		$this->load->view('cuerpo', $this->paginacion('Welcome/genero/','genero',$genero));	
+		   
+		//$this->load->view('genero', $this->paginacion($pagina,$genero));    	
     	//$this->load->view('cuerpo', $this->paguinacion($pagina));
         $this->load->view('footer');
 	}
@@ -142,17 +154,19 @@ class Welcome extends CI_Controller
 		$this->load->model('Movie_model');	
 		//pido al modelo el genero de la pelicula que se desea ver		
 		$ultimosArticulos['pelis'] = $this->Movie_model->get_listar_pelis($var);		
-        $this->load->view('listar', $ultimosArticulos);
+		$this->load->view('listar', $ultimosArticulos);
+		$this->load->view('cuerpo', $this->paginacion('Welcome/listar/','listar',$var));
         $this->load->view('footer');
 	}
 	public function Top(){
 
 		$this->load->view('index');
 		$this->load->view('container');
-		$this->load->model('Movie_model');	
 		//Pide al modelo el genero de la pelicula que se desea ver		
-		$ultimosArticulos['pelis'] = $this->Movie_model->get_listar_top_pelis();		
-        $this->load->view('top', $ultimosArticulos);
+		$ultimosArticulos['pelis'] = $this->Movie_model->get_listar_new_pelis();
+		$this->load->view('banner_bottom',$ultimosArticulos);
+	    //Se llama a la vista para mostrar la información y se adiciona la paguinacion
+	   	$this->load->view('cuerpo', $this->paginacion('Welcome/top/','top',null));	
         $this->load->view('footer');
 	}
 	public function Contactenos(){

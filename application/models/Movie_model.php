@@ -62,12 +62,12 @@ class Movie_model extends CI_Model {
         return $query->result_array();
 	}
 	
-	function get_listar_top_pelis(){
+	function get_listar_top_pelis($porpagina,$segmento){
 
 		$this->db->select('*');	
-		$this->db->order_by("Titulo", "asc");
-		$this->db->limit('6');
+		$this->db->order_by("Titulo", "asc");		
 		$this->db->from('pelis');
+		$query = $this->db->limit($porpagina,$segmento);
         $query = $this->db->get();
         return $query->result_array();
 	}
